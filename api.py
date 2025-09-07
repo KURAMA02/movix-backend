@@ -6,6 +6,14 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/")
+def home():
+    return jsonify({"status": "Backend is running!"})
+
+
+if __name__ == "__main__":
+    app.run()
+
 @app.route("/find_movie", methods=["GET"])
 def find_movie():
     tmdb_id = request.args.get("tmdb_id")
