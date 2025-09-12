@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify
 from scraper import find_movie_link
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -9,10 +10,6 @@ CORS(app)
 @app.route("/")
 def home():
     return jsonify({"status": "Backend is running!"})
-
-
-if __name__ == "__main__":
-    app.run()
 
 @app.route("/find_movie", methods=["GET"])
 def find_movie():
@@ -29,6 +26,6 @@ def find_movie():
 
     return jsonify({"success": False, "message": "Content not found on sources"})
 
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
