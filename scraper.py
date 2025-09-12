@@ -6,7 +6,12 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, is_tv=False, season=
     Get movie or TV embed link from 2Embed or Vidsrc.
     """
     embed_url = None
-    content_id = tmdb_id or imdb_id or title
+
+    # Choose correct ID priority
+    if is_tv:
+        content_id = tmdb_id or imdb_id or title   # TV shows → prefer TMDB
+    else:
+        content_id = imdb_id or tmdb_id or title   # Movies → prefer IMDb
 
     # --- 1. 2Embed ---
     try:
