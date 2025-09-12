@@ -6,28 +6,19 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, is_tv=False, season=
     Get movie or TV embed link from 2Embed or Vidsrc.
     """
     embed_url = None
-    cache_key = tmdb_id or imdb_id or title
+    content_id = tmdb_id or imdb_id or title
 
     # --- 1. 2Embed ---
     try:
         if is_tv:
             if full_season:
-                if tmdb_id:
-                    embed_url = f"https://www.2embed.cc/embedtvfull/{tmdb_id}"
-                elif imdb_id:
-                    embed_url = f"https://www.2embed.cc/embedtvfull/{imdb_id}"
+                embed_url = f"https://www.2embed.cc/embedtvfull/{content_id}"
                 print(f"📺 2Embed Full Season embed: {embed_url}")
             else:
-                if tmdb_id:
-                    embed_url = f"https://www.2embed.cc/embedtv/{tmdb_id}&s={season}&e={episode}"
-                elif imdb_id:
-                    embed_url = f"https://www.2embed.cc/embedtv/{imdb_id}&s={season}&e={episode}"
+                embed_url = f"https://www.2embed.cc/embedtv/{content_id}&s={season}&e={episode}"
                 print(f"📺 2Embed TV Episode embed: {embed_url}")
         else:
-            if tmdb_id:
-                embed_url = f"https://www.2embed.cc/embed/{tmdb_id}"
-            elif imdb_id:
-                embed_url = f"https://www.2embed.cc/embed/{imdb_id}"
+            embed_url = f"https://www.2embed.cc/embed/{content_id}"
             print(f"🎬 2Embed Movie embed: {embed_url}")
     except Exception as e:
         print(f"❌ 2Embed error: {e}")
@@ -36,16 +27,14 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, is_tv=False, season=
     if not embed_url:
         try:
             if is_tv:
-                if tmdb_id:
-                    embed_url = f"https://vidsrc.to/embed/tv/{tmdb_id}"
-                elif imdb_id:
-                    embed_url = f"https://vidsrc.to/embed/tv/{imdb_id}"
-                print(f"📺 Vidsrc TV embed: {embed_url}")
+                if full_season:
+                    embed_url = f"https://vidsrc.to/embed/tv/{content_id}/{season}"
+                    print(f"📺 Vidsrc TV Season embed: {embed_url}")
+                else:
+                    embed_url = f"https://vidsrc.to/embed/tv/{content_id}/{season}/{episode}"
+                    print(f"📺 Vidsrc TV Episode embed: {embed_url}")
             else:
-                if tmdb_id:
-                    embed_url = f"https://vidsrc.to/embed/movie/{tmdb_id}"
-                elif imdb_id:
-                    embed_url = f"https://vidsrc.to/embed/movie/{imdb_id}"
+                embed_url = f"https://vidsrc.to/embed/movie/{content_id}"
                 print(f"🎬 Vidsrc Movie embed: {embed_url}")
         except Exception as e:
             print(f"❌ Vidsrc error: {e}")
