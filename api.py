@@ -19,13 +19,16 @@ def find_movie():
     tmdb_id = request.args.get("tmdb_id")
     imdb_id = request.args.get("imdb_id")
     title = request.args.get("title")
+    content_type = request.args.get("type", "movie")  # default = movie
+    is_tv = content_type.lower() == "tv"
 
-    result = find_movie_link(tmdb_id=tmdb_id, imdb_id=imdb_id, title=title)
+    result = find_movie_link(tmdb_id=tmdb_id, imdb_id=imdb_id, title=title, is_tv=is_tv)
 
     if result:
         return jsonify(result)
 
-    return jsonify({"success": False, "message": "Movie not found on sources"})
+    return jsonify({"success": False, "message": "Content not found on sources"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
