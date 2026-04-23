@@ -1,52 +1,82 @@
 import requests
 from config import HEADERS
 
-def find_movie_link(tmdb_id=None, imdb_id=None, title=None, is_tv=False, season=1, episode=1, full_season=False):
-    """
-    Get movie or TV embed link from 2Embed or Vidsrc.
-    """
+# ========================
+# Priority order:
+# 1. Vidsrc (multi-domain)
+# 2. 2embed.online (NEW)
+# 3. FlixHQ (fallback)
+# ========================
+
+VIDSRC_DOMAINS = [
+    "https://vidsrc-embed.ru",
+    "https://vidsrc-embed.su",
+    "https://vidsrcme.su",
+    "https://vsrc.su"
+]
+
+def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode=None):
     embed_url = None
 
-    # Choose correct ID priority
-    if is_tv:
-        content_id = tmdb_id or imdb_id or title   # TV shows → prefer TMDB
-    else:
-        content_id = imdb_id or tmdb_id or title   # Movies → prefer IMDb
-
-    # --- 1. 2Embed ---
+    # --- 1. Vidsrc ---
     try:
-        if is_tv:
-            if full_season:
-                embed_url = f"https://www.2embed.cc/embedtvfull/{content_id}"
-                print(f"📺 2Embed Full Season embed: {embed_url}")
+        for domain in VIDSRC_DOMAINS:
+            if season and episode:
+                test_url = f"{domain}/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}"
             else:
-                embed_url = f"https://www.2embed.cc/embedtv/{content_id}&s={season}&e={episode}"
-                print(f"📺 2Embed TV Episode embed: {embed_url}")
-        else:
-            embed_url = f"https://www.2embed.cc/embed/{content_id}"
-            print(f"🎬 2Embed Movie embed: {embed_url}")
-    except Exception as e:
-        print(f"❌ 2Embed error: {e}")
+                if imdb_id:
+                    test_url = f"{domain}/embed/movie?imdb={imdb_id}"
+                else:
+                    test_url = f"{domain}/embed/movie?tmdb={tmdb_id}"
 
-    # --- 2. Vidsrc fallback ---
+            try:
+                res = requests.get(test_url, headers=HEADERS, timeout=5)
+                if res.status_code == 200:
+                    embed_url = test_url
+                    print(f"🎬 Vidsrc working: {embed_url}")
+                    break
+            except:
+                continue
+
+    except Exception as e:
+        print(f"❌ Vidsrc error: {e}")
+
+
+    # --- 2. 2Embed (UPDATED to 2embed.online) ---
     if not embed_url:
         try:
-            if is_tv:
-                if full_season:
-                    embed_url = f"https://vidsrc.to/embed/tv/{content_id}/{season}"
-                    print(f"📺 Vidsrc TV Season embed: {embed_url}")
+            if season and episode:
+                # TV SHOW (NEW FORMAT)
+                if imdb_id:
+                    embed_url = f"https://www.2embed.online/embed/tv/{imdb_id}/{season}/{episode}"
                 else:
-                    embed_url = f"https://vidsrc.to/embed/tv/{content_id}/{season}/{episode}"
-                    print(f"📺 Vidsrc TV Episode embed: {embed_url}")
+                    embed_url = f"https://www.2embed.online/embed/tv/{tmdb_id}/{season}/{episode}"
+                print(f"🎬 2Embed TV embed: {embed_url}")
             else:
-                embed_url = f"https://vidsrc.to/embed/movie/{content_id}"
-                print(f"🎬 Vidsrc Movie embed: {embed_url}")
-        except Exception as e:
-            print(f"❌ Vidsrc error: {e}")
+                # MOVIE (NEW FORMAT)
+                if imdb_id:
+                    embed_url = f"https://www.2embed.online/embed/movie/{imdb_id}"
+                else:
+                    embed_url = f"https://www.2embed.online/embed/movie/{tmdb_id}"
+                print(f"🎬 2Embed movie embed: {embed_url}")
 
-    # --- No sources found ---
+        except Exception as e:
+            print(f"❌ 2Embed error: {e}")
+
+
+    # --- 3. FlixHQ fallback ---
     if not embed_url:
-        return {"success": False, "message": "Content not available"}
+        try:
+            search_url = f"https://flixhq.to/search/{tmdb_id or imdb_id}"
+            print(f"🔍 FlixHQ search: {search_url}")
+            res = requests.get(search_url, headers=HEADERS, timeout=10)
+            if res.status_code == 200:
+                embed_url = search_url
+        except Exception as e:
+            print(f"❌ FlixHQ error: {e}")
+
+    if not embed_url:
+        return {"success": False, "message": "Movie not available"}
 
     return {
         "success": True,
