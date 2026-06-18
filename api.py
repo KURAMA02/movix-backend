@@ -1,4 +1,3 @@
-# api.py
 from flask import Flask, request, jsonify
 from scraper import find_movie_link
 from flask_cors import CORS
@@ -21,7 +20,7 @@ def find_movie():
 
 
 # =========================
-# ✅ UPDATED TV ENDPOINT (supports Vidsrc + 2Embed.online)
+# TV ENDPOINT (UPDATED MINIMALLY)
 # =========================
 @app.route("/find_tv", methods=["GET"])
 def find_tv():
@@ -29,35 +28,17 @@ def find_tv():
     season = request.args.get("season")
     episode = request.args.get("episode")
 
-    embed_url = None
+    # ✅ ONLY CHANGE: use scraper (same as movies)
+    result = find_movie_link(
+        tmdb_id=tmdb_id,
+        season=season,
+        episode=episode
+    )
 
-    # --- 1. Try Vidsrc domains first ---
-    vidsrc_domains = [
-        "https://vidsrc-embed.ru",
-        "https://vidsrc-embed.su",
-        "https://vidsrcme.su",
-        "https://vsrc.su"
-    ]
+    if result:
+        return jsonify(result)
 
-    for domain in vidsrc_domains:
-        embed_url = f"{domain}/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}"
-        break  # keep same logic (no validation added)
-
-    # --- 2. Fallback to 2Embed.online (NEW) ---
-    if not embed_url:
-        try:
-            embed_url = f"https://www.2embed.online/embed/tv/{tmdb_id}/{season}/{episode}"
-        except:
-            pass
-
-    if not embed_url:
-        return jsonify({"success": False, "message": "TV episode not available"})
-
-    return jsonify({
-        "success": True,
-        "server": "direct",
-        "embed_url": embed_url
-    })
+    return jsonify({"success": False, "message": "TV episode not available"})
 
 
 if __name__ == "__main__":
