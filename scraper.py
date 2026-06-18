@@ -16,7 +16,9 @@ VIDSRC_DOMAINS = [
 ]
 
 def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode=None):
+
     embed_url = None
+    servers = []  # ✅ NEW (ONLY ADDITION)
 
     # --- 1. Vidsrc ---
     try:
@@ -34,6 +36,12 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
                 if res.status_code == 200:
                     embed_url = test_url
                     print(f"🎬 Vidsrc working: {embed_url}")
+
+                    servers.append({
+                        "name": f"Vidsrc ({domain.replace('https://','')})",
+                        "url": test_url
+                    })
+
                     break
             except:
                 continue
@@ -42,26 +50,31 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
         print(f"❌ Vidsrc error: {e}")
 
 
-    # --- 2. 2Embed (UPDATED to 2embed.online) ---
-    if not embed_url:
-        try:
-            if season and episode:
-                # TV SHOW (NEW FORMAT)
-                if imdb_id:
-                    embed_url = f"https://www.2embed.online/embed/tv/{imdb_id}/{season}/{episode}"
-                else:
-                    embed_url = f"https://www.2embed.online/embed/tv/{tmdb_id}/{season}/{episode}"
-                print(f"🎬 2Embed TV embed: {embed_url}")
+    # --- 2. 2Embed (PRIMARY LOGIC KEPT SAME) ---
+    try:
+        if season and episode:
+            if imdb_id:
+                url = f"https://www.2embed.online/embed/tv/{imdb_id}/{season}/{episode}"
             else:
-                # MOVIE (NEW FORMAT)
-                if imdb_id:
-                    embed_url = f"https://www.2embed.online/embed/movie/{imdb_id}"
-                else:
-                    embed_url = f"https://www.2embed.online/embed/movie/{tmdb_id}"
-                print(f"🎬 2Embed movie embed: {embed_url}")
+                url = f"https://www.2embed.online/embed/tv/{tmdb_id}/{season}/{episode}"
 
-        except Exception as e:
-            print(f"❌ 2Embed error: {e}")
+            print(f"🎬 2Embed TV embed: {url}")
+        else:
+            if imdb_id:
+                url = f"https://www.2embed.online/embed/movie/{imdb_id}"
+            else:
+                url = f"https://www.2embed.online/embed/movie/{tmdb_id}"
+
+            print(f"🎬 2Embed movie embed: {url}")
+
+        # 2Embed is ALWAYS primary
+        servers.insert(0, {
+            "name": "2Embed",
+            "url": url
+        })
+
+    except Exception as e:
+        print(f"❌ 2Embed error: {e}")
 
 
     # --- 3. FlixHQ fallback ---
@@ -69,17 +82,24 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
         try:
             search_url = f"https://flixhq.to/search/{tmdb_id or imdb_id}"
             print(f"🔍 FlixHQ search: {search_url}")
-            res = requests.get(search_url, headers=HEADERS, timeout=10)
-            if res.status_code == 200:
-                embed_url = search_url
+
+            servers.append({
+                "name": "FlixHQ",
+                "url": search_url
+            })
+
+            embed_url = search_url
+
         except Exception as e:
             print(f"❌ FlixHQ error: {e}")
 
-    if not embed_url:
+
+    # --- FINAL CHECK ---
+    if not servers:
         return {"success": False, "message": "Movie not available"}
 
     return {
         "success": True,
-        "server": "direct",
-        "embed_url": embed_url
+        "server": "2Embed",
+        "servers": servers   # ✅ NEW OUTPUT FORMAT
     }
