@@ -3,9 +3,10 @@ from config import HEADERS
 
 # ========================
 # Priority order:
-# 1. Vidsrc (multi-domain)
-# 2. 2embed.online (NEW)
-# 3. FlixHQ (fallback)
+# 1. VidLink (NEW PRIMARY)
+# 2. Vidsrc
+# 3. 2Embed
+# 4. FlixHQ
 # ========================
 
 VIDSRC_DOMAINS = [
@@ -18,9 +19,34 @@ VIDSRC_DOMAINS = [
 def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode=None):
 
     embed_url = None
-    servers = []  # ✅ NEW (ONLY ADDITION)
+    servers = []
 
-    # --- 1. Vidsrc ---
+    # ==========================================
+    # 1. VIDLINK (NEW PRIMARY)
+    # ==========================================
+    try:
+        if tmdb_id:
+            if season and episode:
+                url = f"https://vidlink.pro/tv/{tmdb_id}/{season}/{episode}"
+                print(f"🎬 VidLink TV: {url}")
+            else:
+                url = f"https://vidlink.pro/movie/{tmdb_id}"
+                print(f"🎬 VidLink Movie: {url}")
+
+            servers.append({
+                "name": "VidLink",
+                "url": url
+            })
+
+            embed_url = url
+
+    except Exception as e:
+        print(f"❌ VidLink error: {e}")
+
+
+    # ==========================================
+    # 2. Vidsrc
+    # ==========================================
     try:
         for domain in VIDSRC_DOMAINS:
             if season and episode:
@@ -34,8 +60,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
             try:
                 res = requests.get(test_url, headers=HEADERS, timeout=5)
                 if res.status_code == 200:
-                    embed_url = test_url
-                    print(f"🎬 Vidsrc working: {embed_url}")
+                    print(f"🎬 Vidsrc working: {test_url}")
 
                     servers.append({
                         "name": f"Vidsrc ({domain.replace('https://','')})",
@@ -50,7 +75,9 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
         print(f"❌ Vidsrc error: {e}")
 
 
-    # --- 2. 2Embed (PRIMARY LOGIC KEPT SAME) ---
+    # ==========================================
+    # 3. 2Embed
+    # ==========================================
     try:
         if season and episode:
             if imdb_id:
@@ -59,6 +86,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
                 url = f"https://www.2embed.online/embed/tv/{tmdb_id}/{season}/{episode}"
 
             print(f"🎬 2Embed TV embed: {url}")
+
         else:
             if imdb_id:
                 url = f"https://www.2embed.online/embed/movie/{imdb_id}"
@@ -67,8 +95,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
             print(f"🎬 2Embed movie embed: {url}")
 
-        # 2Embed is ALWAYS primary
-        servers.insert(0, {
+        servers.append({
             "name": "2Embed",
             "url": url
         })
@@ -77,29 +104,33 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
         print(f"❌ 2Embed error: {e}")
 
 
-    # --- 3. FlixHQ fallback ---
-    if not embed_url:
-        try:
-            search_url = f"https://flixhq.to/search/{tmdb_id or imdb_id}"
-            print(f"🔍 FlixHQ search: {search_url}")
+    # ==========================================
+    # 4. FlixHQ fallback
+    # ==========================================
+    try:
+        search_url = f"https://flixhq.to/search/{tmdb_id or imdb_id}"
+        print(f"🔍 FlixHQ search: {search_url}")
 
-            servers.append({
-                "name": "FlixHQ",
-                "url": search_url
-            })
+        servers.append({
+            "name": "FlixHQ",
+            "url": search_url
+        })
 
+        if not embed_url:
             embed_url = search_url
 
-        except Exception as e:
-            print(f"❌ FlixHQ error: {e}")
+    except Exception as e:
+        print(f"❌ FlixHQ error: {e}")
 
 
-    # --- FINAL CHECK ---
+    # ==========================================
+    # FINAL CHECK
+    # ==========================================
     if not servers:
         return {"success": False, "message": "Movie not available"}
 
     return {
         "success": True,
-        "server": "2Embed",
-        "servers": servers   # ✅ NEW OUTPUT FORMAT
+        "server": "VidLink",
+        "servers": servers
     }
