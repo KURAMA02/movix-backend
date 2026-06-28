@@ -10,10 +10,8 @@ from config import HEADERS
 # ========================
 
 VIDSRC_DOMAINS = [
-    "https://vidsrc-embed.ru",
-    "https://vidsrc-embed.su",
-    "https://vidsrcme.su",
-    "https://vsrc.su"
+    "https://vidsrc.to",
+    "https://vidsrc.sbs"
 ]
 
 def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode=None):
@@ -81,17 +79,17 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
     try:
         if season and episode:
             if imdb_id:
-                url = f"https://www.2embed.online/embed/tv/{imdb_id}/{season}/{episode}"
+                url = f"https://www.2embed.cc/embed/tv/{imdb_id}/{season}/{episode}"
             else:
-                url = f"https://www.2embed.online/embed/tv/{tmdb_id}/{season}/{episode}"
+                url = f"https://www.2embed.cc/embed/tv/{tmdb_id}/{season}/{episode}"
 
             print(f"🎬 2Embed TV embed: {url}")
 
         else:
             if imdb_id:
-                url = f"https://www.2embed.online/embed/movie/{imdb_id}"
+                url = f"https://www.2embed.cc/embed/movie/{imdb_id}"
             else:
-                url = f"https://www.2embed.online/embed/movie/{tmdb_id}"
+                url = f"https://www.2embed.cc/embed/movie/{tmdb_id}"
 
             print(f"🎬 2Embed movie embed: {url}")
 
