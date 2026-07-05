@@ -77,40 +77,78 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
     except Exception as e:
         print(f"❌ VidLink error: {e}")
 
-
     # ==========================================
-    # 3. Vidsrc
+    # 3. 111Movies
     # ==========================================
     try:
-        for domain in VIDSRC_DOMAINS:
+        if tmdb_id or imdb_id:
+
+            media_id = imdb_id if imdb_id else tmdb_id
+
             if season and episode:
-                test_url = f"{domain}/embed/tv?tmdb={tmdb_id}&season={season}&episode={episode}"
+                url = (
+                    f"https://111movies.net/tv/"
+                    f"{media_id}/{season}/{episode}"
+                    "?autoPlay=true"
+                )
+                print(f"🎬 111movies.net TV: {url}")
+
             else:
-                if imdb_id:
-                    test_url = f"{domain}/embed/movie?imdb={imdb_id}"
-                else:
-                    test_url = f"{domain}/embed/movie?tmdb={tmdb_id}"
+                url = (
+                    f"https://111movies.net/movie/"
+                    f"{media_id}"
+                    "?autoPlay=true"
+                )
+                print(f"🎬 111movies.net: {url}")
 
-            try:
-                res = requests.get(test_url, headers=HEADERS, timeout=5)
-                if res.status_code == 200:
-                    print(f"🎬 Vidsrc working: {test_url}")
-
-                    servers.append({
-                        "name": f"Vidsrc ({domain.replace('https://','')})",
-                        "url": test_url
-                    })
-
-                    break
-            except:
-                continue
+            servers.append({
+                "name": "111movies",
+                "url": url
+            })
+          
+            embed_url = url
 
     except Exception as e:
-        print(f"❌ Vidsrc error: {e}")
+        print(f"❌ 111movies: {e}")
 
 
     # ==========================================
-    # 4. 2Embed
+    # 4. Vidsrc
+    # ==========================================
+    try:
+        if tmdb_id or imdb_id:
+
+            media_id = imdb_id if imdb_id else tmdb_id
+
+            if season and episode:
+                url = (
+                    f"https://vidsrc.sbs/tv/"
+                    f"{media_id}/{season}/{episode}"
+                    "?autoPlay=true"
+                )
+                print(f"🎬 vidsrc TV: {url}")
+
+            else:
+                url = (
+                    f"https://vidsrc.sbs/movie/"
+                    f"{media_id}"
+                    "?autoPlay=true"
+                )
+                print(f"🎬 vidsrc: {url}")
+
+            servers.append({
+                "name": "vidsrc.sbs",
+                "url": url
+            })
+          
+            embed_url = url
+
+    except Exception as e:
+        print(f"❌ vidsrc: {e}")
+
+
+    # ==========================================
+    # 5. 2Embed
     # ==========================================
     try:
         if season and episode:
@@ -139,7 +177,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
 
     # ==========================================
-    # 5. FlixHQ fallback
+    # 6. FlixHQ fallback
     # ==========================================
     try:
         search_url = f"https://flixhq.to/search/{tmdb_id or imdb_id}"
