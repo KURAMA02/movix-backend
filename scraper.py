@@ -41,7 +41,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
                 url = (
                     f"https://vidfast.io/movie/"
                     f"{media_id}"
-                "    ?autoPlay=true"
+                    "?autoPlay=true"
                 )
                 print(f"🎬 VidFast Movie: {url}")
 
@@ -49,15 +49,14 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
                 "name": "VidFast",
                 "url": url
             })
+          
+            embed_url = url
 
-            if not embed_url:
-                embed_url = url
-
-except Exception as e:
-    print(f"❌ VidFast error: {e}")
+    except Exception as e:
+        print(f"❌ VidFast error: {e}")
 
     # ==========================================
-    # 2. VIDLINK (NEW PRIMARY)
+    # 2. VIDLINK
     # ==========================================
     try:
         if tmdb_id:
@@ -72,8 +71,8 @@ except Exception as e:
                 "name": "VidLink",
                 "url": url
             })
-
-            embed_url = url
+            if not embed_url:
+                embed_url = url
 
     except Exception as e:
         print(f"❌ VidLink error: {e}")
