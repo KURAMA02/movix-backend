@@ -3,10 +3,11 @@ from config import HEADERS
 
 # ========================
 # Priority order:
-# 1. VidLink (NEW PRIMARY)
-# 2. Vidsrc
-# 3. 2Embed
-# 4. FlixHQ
+# 1. VidFast
+# 2. VidLink
+# 3. Vidsrc
+# 4. 2Embed
+# 5. FlixHQ
 # ========================
 
 VIDSRC_DOMAINS = [
@@ -24,33 +25,33 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
     # 1. VIDfast (NEW PRIMARY)
     # ==========================================
     try:
-    if tmdb_id or imdb_id:
+        if tmdb_id or imdb_id:
 
-        media_id = imdb_id if imdb_id else tmdb_id
+            media_id = imdb_id if imdb_id else tmdb_id
 
-        if season and episode:
-            url = (
-                f"https://vidfast.pro/tv/"
-                f"{media_id}/{season}/{episode}"
-                "?autoPlay=true"
-            )
-            print(f"🎬 VidFast TV: {url}")
+            if season and episode:
+                url = (
+                    f"https://vidfast.pro/tv/"
+                    f"{media_id}/{season}/{episode}"
+                    "?autoPlay=true"
+                )
+                print(f"🎬 VidFast TV: {url}")
 
-        else:
-            url = (
-                f"https://vidfast.io/movie/"
-                f"{media_id}"
-                "?autoPlay=true"
-            )
-            print(f"🎬 VidFast Movie: {url}")
+            else:
+                url = (
+                    f"https://vidfast.io/movie/"
+                    f"{media_id}"
+                "    ?autoPlay=true"
+                )
+                print(f"🎬 VidFast Movie: {url}")
 
-        servers.append({
-            "name": "VidFast",
-            "url": url
-        })
+            servers.append({
+                "name": "VidFast",
+                "url": url
+            })
 
-        if not embed_url:
-            embed_url = url
+            if not embed_url:
+                embed_url = url
 
 except Exception as e:
     print(f"❌ VidFast error: {e}")
@@ -165,6 +166,6 @@ except Exception as e:
 
     return {
         "success": True,
-        "server": "VidLink",
+        "server": "VidFast",
         "servers": servers
     }
