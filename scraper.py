@@ -122,7 +122,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
             if season and episode:
                 url = (
-                    f"https://vidsrc.sbs/tv/"
+                    f"https://vidsrc.sbs/embed/tv/"
                     f"{media_id}/{season}/{episode}"
                     "?autoPlay=true"
                 )
@@ -130,7 +130,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
             else:
                 url = (
-                    f"https://vidsrc.sbs/movie/"
+                    f"https://vidsrc.sbs/embed/movie/"
                     f"{media_id}"
                     "?autoPlay=true"
                 )
