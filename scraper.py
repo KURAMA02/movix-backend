@@ -19,8 +19,44 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
     embed_url = None
     servers = []
 
+
     # ==========================================
-    # 1. VIDLINK (NEW PRIMARY)
+    # 1. VIDfast (NEW PRIMARY)
+    # ==========================================
+    try:
+    if tmdb_id or imdb_id:
+
+        media_id = imdb_id if imdb_id else tmdb_id
+
+        if season and episode:
+            url = (
+                f"https://vidfast.pro/tv/"
+                f"{media_id}/{season}/{episode}"
+                "?autoPlay=true"
+            )
+            print(f"🎬 VidFast TV: {url}")
+
+        else:
+            url = (
+                f"https://vidfast.io/movie/"
+                f"{media_id}"
+                "?autoPlay=true"
+            )
+            print(f"🎬 VidFast Movie: {url}")
+
+        servers.append({
+            "name": "VidFast",
+            "url": url
+        })
+
+        if not embed_url:
+            embed_url = url
+
+except Exception as e:
+    print(f"❌ VidFast error: {e}")
+
+    # ==========================================
+    # 2. VIDLINK (NEW PRIMARY)
     # ==========================================
     try:
         if tmdb_id:
@@ -43,7 +79,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
 
     # ==========================================
-    # 2. Vidsrc
+    # 3. Vidsrc
     # ==========================================
     try:
         for domain in VIDSRC_DOMAINS:
@@ -74,7 +110,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
 
     # ==========================================
-    # 3. 2Embed
+    # 4. 2Embed
     # ==========================================
     try:
         if season and episode:
@@ -103,7 +139,7 @@ def find_movie_link(tmdb_id=None, imdb_id=None, title=None, season=None, episode
 
 
     # ==========================================
-    # 4. FlixHQ fallback
+    # 5. FlixHQ fallback
     # ==========================================
     try:
         search_url = f"https://flixhq.to/search/{tmdb_id or imdb_id}"
